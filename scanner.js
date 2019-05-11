@@ -2,7 +2,7 @@ const request = require('request');
 const cheerio = require('cheerio');
 const fs = require('fs');
 const URL_FORMAT = "https://www.ebay.com/sch/", FILE_FORMAT_LISTINGS = "./listings/";
-var PAGE_DEPTH = 5, ITEMS_PER_REQUEST = 200;
+var PAGE_DEPTH = 1, ITEMS_PER_REQUEST = 25;
 
 console.log("scanner started...");
 fs.mkdir(FILE_FORMAT_LISTINGS, () => {});
@@ -12,9 +12,9 @@ fs.readFile('./options.json', function callback(error, data) {
         console.log(error);
         let json = {
             time: 60,
-            keywords: ['keyword1', 'keyword2', 'keyword3'],
-            items_per_request: 200,
-            page_depth: 5
+            keywords: ['bunny', 'rabbit', 'wafer'],
+            items_per_request: 25,
+            page_depth: 1
         };
         fs.writeFile('options.json', JSON.stringify(json), function callback(err) {
             if(err) {
@@ -92,13 +92,14 @@ function compare(data, data1) {
 }
 
 function scrapeLinks(query, pageNumber, itemsPerRequest, callback) {
-    let links = [], queryLink = URL_FORMAT + query + "&ipg=" + itemsPerRequest + "&_pgn=" + pageNumber;
+    let links = [], queryLink = URL_FORMAT + query + "&_ipg=" + itemsPerRequest + "&_pgn=" + pageNumber;
     console.log(queryLink);
     request(queryLink, (err, res, html) => {
         if(err) console.log(err);
         let $ = cheerio.load(html);
         $('#srp-river-results').find('ul > li > div > div > a').each((index, element) => {
             let link = $(element).attr('href');
+            //40 times
             links.push(link);
         });
         callback(links);
