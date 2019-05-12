@@ -16,12 +16,7 @@ fs.readFile('./options.json', function callback(error, data) {
             items_per_request: 25,
             page_depth: 1
         };
-        fs.writeFile('options.json', JSON.stringify(json), function callback(err) {
-            if(err) {
-                console.log("NOTICE: Error creating options.json.. log will follow.");
-                console.log(err);
-            }
-        });
+        saveData('options.json', JSON.stringify(json));
     } else {
         let json = JSON.parse(data);
         let keywords = json.keywords, time = (json.time * 1000);
@@ -52,23 +47,23 @@ function saveListings(query) {
                 all_links = [].concat(all_links, links);
                 if((i+1) == PAGE_DEPTH) {
                     if(err) {
-                        fs.writeFile(fileString, JSON.stringify(all_links, null, 2), (err) => {
-                            if(err) {
-                                console.log("NOTICE: Failed to write links to file on query " + query + ", stack will follow.");
-                                console.log(err);
-                            } else {
-                                console.log("INFO: Writing " + all_links.length + " items to " + fileString);
-                            }
-                        });
+                        saveData(fileString, JSON.stringify(all_links, null, 2));
                     } else {
-                        fs.unlink(fileString, function callback(err) {
-                            if(err) {
-                                console.log("NOTICE: Failed to delete listings file " + fileString + ", stack will follow.");
-                                console.log(err);
-                                return null;
-                            }
-                        });
-                        
+                        let oldLinks = JSON.parse(data);
+                        let linksUnsaved = findNewLinks(oldLinks, all_links);
+                        if(linksUnsaved != null) {
+                            console.log("Unsaved Links!");
+                            fs.unlink(fileString, function callback(err) {
+                                if(err) {
+                                    console.log("NOTICE: Failed to delete listings file " + fileString + ", stack will follow.");
+                                    console.log(err);
+                                    return null;
+                                }
+                            });
+                            saveData(fileString, JSON.stringify(all_links, null, 2));
+                        } else {
+                            console.log("all links identical");
+                        }
                     }
                 }
             });
@@ -76,8 +71,8 @@ function saveListings(query) {
     });
 }
 
-function saveData(fileName, jsonData) {
-    fs.writeFile(fileName, jsonData, function callback(err) {
+function saveData(fileName, data) {
+    fs.writeFile(fileName, data, function callback(err) {
         if(err) {
             console.log("NOTICE: Failed to create file " + fileName + ", stack will follow.");
             console.log(err);
@@ -87,8 +82,17 @@ function saveData(fileName, jsonData) {
     });
 }
 
-function compare(data, data1) {
-    return true;
+function findNewLinks(linksArray, linksArrayNew) {
+    let links = [];
+    for(let i = 0; i <= linksArrayNew.length; i++) {
+        console.log(linksArrayNew[i]);
+        if(linksArray.indexOf(linksArrayNew[i]) === -1) {
+            console.log("pushing link!! :DDD");
+            links.push(linksArrayNew[i]);
+        }
+    }
+    if(links.length == 0) links = null;
+    return links;
 }
 
 function scrapeLinks(query, pageNumber, itemsPerRequest, callback) {
@@ -100,7 +104,7 @@ function scrapeLinks(query, pageNumber, itemsPerRequest, callback) {
         $('#srp-river-results').find('ul > li > div > div > a').each((index, element) => {
             let link = $(element).attr('href');
             //40 times
-            links.push(link);
+            links.push(link.substr(0, link.indexOf("?")));
         });
         callback(links);
     })
