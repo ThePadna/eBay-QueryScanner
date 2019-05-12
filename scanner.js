@@ -52,7 +52,7 @@ function saveListings(query) {
                 all_links = [].concat(all_links, links);
                 if((i+1) == PAGE_DEPTH) {
                     if(err) {
-                        fs.writeFile(fileString, all_links, (err) => {
+                        fs.writeFile(fileString, JSON.stringify(all_links, null, 2), (err) => {
                             if(err) {
                                 console.log("NOTICE: Failed to write links to file on query " + query + ", stack will follow.");
                                 console.log(err);
