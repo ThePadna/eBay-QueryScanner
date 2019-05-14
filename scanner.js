@@ -25,14 +25,12 @@ fs.readFile('./options.json', function callback(error, data) {
         console.log("Keywords: " + keywords + "\nIPR: " + ITEMS_PER_REQUEST + "\nPage Depth: " + PAGE_DEPTH);
         console.log("Performing first listing check... scheduled for every " + (time / 1000) + " minute(s).");
         keywords.forEach(function callback(i) {
-            let newItems = saveListings(i);
-            if(newItems === null) {
-                console.log("NOTICE: there was a problem comparing items with new listings on keyword " + i + ".");
-            } else {
-                //notify
-            }
+            saveListings(i);
         });
         setInterval(() => {
+            keywords.forEach(function callback(i) {
+                saveListings(i);
+            });
         }, time);
     }
 });
@@ -60,7 +58,7 @@ function saveListings(query) {
                                 }
                             });
                             saveData(fileString, JSON.stringify(all_links, null, 2));
-                            console.log("Email these new links: " + linksUnsaved);
+                            console.log("New links found while querying (Have been saved):\n " + linksUnsaved);
                         } else {
                             //links identical
                         }
