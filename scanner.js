@@ -52,7 +52,6 @@ function saveListings(query) {
                         let oldLinks = JSON.parse(data);
                         let linksUnsaved = findNewLinks(oldLinks, all_links);
                         if(linksUnsaved != null) {
-                            console.log("Unsaved Links!");
                             fs.unlink(fileString, function callback(err) {
                                 if(err) {
                                     console.log("NOTICE: Failed to delete listings file " + fileString + ", stack will follow.");
@@ -61,8 +60,9 @@ function saveListings(query) {
                                 }
                             });
                             saveData(fileString, JSON.stringify(all_links, null, 2));
+                            console.log("Email these new links: " + linksUnsaved);
                         } else {
-                            console.log("all links identical");
+                            //links identical
                         }
                     }
                 }
@@ -84,10 +84,8 @@ function saveData(fileName, data) {
 
 function findNewLinks(linksArray, linksArrayNew) {
     let links = [];
-    for(let i = 0; i <= linksArrayNew.length; i++) {
-        console.log(linksArrayNew[i]);
+    for(let i = 0; i < linksArrayNew.length; i++) {
         if(linksArray.indexOf(linksArrayNew[i]) === -1) {
-            console.log("pushing link!! :DDD");
             links.push(linksArrayNew[i]);
         }
     }
